@@ -95,3 +95,4 @@ df_prediction_prob.rename(columns= {0: 'Adelie',
 with st.expander('Result'):
   st.write('**Here are the results**')
   st.write('**Nevermind**')
+  st.write('**HUxley**')
