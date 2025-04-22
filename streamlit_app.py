@@ -31,11 +31,11 @@ if st.button("Proses"):
 
     # --- Display Status ---
     st.markdown("### Status Deteksi")
-    if status == "Berisiko":
+    if status == "Terindikasi":
         st.markdown("""
         <div style='text-align: center;'>
             <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#9D7BFB 0% 65%, #E3DAFB 65% 100%); margin: auto;'></div>
-            <p style='font-weight: bold; color: #6C3FC5;'>Berisiko</p>
+            <p style='font-weight: bold; color: #6C3FC5;'>Terindikasi</p>
         </div>
         """, unsafe_allow_html=True)
     else:
