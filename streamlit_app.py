@@ -1,11 +1,9 @@
 import streamlit as st
 import joblib
-from full_pipeline import TextPreprocessor
 
-
-# Load models
+# Load models (preprocessing already inside)
 model_relevansi = joblib.load("model_relevansi_SVM_full_pipeline.pkl")
-model_kategori = joblib.load("model_Kategori_RF_full_pipeline.pkl")
+model_kategori = joblib.load("model_kategori_RF_full_pipeline.pkl")
 
 # Prediction logic
 def classify_tweet(text):
@@ -16,10 +14,8 @@ def classify_tweet(text):
         kategori = model_kategori.predict([text])[0]
         return "Berisiko", f"Ada potensi kamu termasuk dalam kategori: **{kategori}**."
 
-# Streamlit Page Config
+# Streamlit UI
 st.set_page_config(page_title="Mental Health Detector", layout="centered")
-
-# --- Title & Input ---
 st.markdown("## Apa yang ada di pikiranmu?")
 user_input = st.text_area(
     "Tulis tentang bagaimana perasaanmu, apa yang sedang kamu pikirkan, atau hal lain yang ingin kamu ungkapkan",
@@ -27,8 +23,7 @@ user_input = st.text_area(
     height=120
 )
 
-# --- Button & Prediction ---
-if st.button("Proses"):
+if st.button("Proses") and user_input.strip():
     status, message = classify_tweet(user_input)
 
     # --- Display Status ---

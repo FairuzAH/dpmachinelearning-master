@@ -1,6 +1,5 @@
 import pandas as pd
 import re
-
 from sklearn.base import BaseEstimator, TransformerMixin
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
@@ -9,7 +8,6 @@ from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFacto
 normalizad_word = pd.read_csv("colloquial-indonesian-lexicon.csv")
 normalizad_word_dict = dict(zip(normalizad_word.iloc[:, 0], normalizad_word.iloc[:, 1]))
 
-# Preprocessing class
 class TextPreprocessor(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.stemmer = StemmerFactory().create_stemmer()
