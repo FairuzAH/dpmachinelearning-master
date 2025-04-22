@@ -1,6 +1,6 @@
 import streamlit as st
 import joblib
-from full_pipeline import TextPreprocessor
+from text_processor import TextPreprocessor
 
 
 # Load models
