@@ -1,98 +1,51 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+import joblib
 
-st.title('Machine Learning App')
+# Load models
+model_relevansi = joblib.load("model_relevansi_SVM_full_pipeline.pkl")
+model_kategori = joblib.load("model_Kategori_RF_full_pipeline.pkl")
 
-st.write('This is a Machine Learning Application new one')
+# Prediction logic
+def classify_tweet(text):
+    relevansi = model_relevansi.predict([text])[0]
+    if relevansi == 'Tidak':
+        return "Tidak Relevan", "Tulisan tidak relevan dengan gangguan kesehatan mental"
+    else:
+        kategori = model_kategori.predict([text])[0]
+        return "Berisiko", f"Ada potensi kamu termasuk dalam kategori: **{kategori}**."
 
-with st.expander('Data'):
-  st.write('**Raw data**')
-  df = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/refs/heads/master/penguins_cleaned.csv')
-  df
+# Streamlit Page Config
+st.set_page_config(page_title="Mental Health Detector", layout="centered")
 
-  st.write('**X**')
-  x_raw = df.drop('species', axis=1)
-  x_raw
+# --- Title & Input ---
+st.markdown("## Apa yang ada di pikiranmu?")
+user_input = st.text_area(
+    "Tulis tentang bagaimana perasaanmu, apa yang sedang kamu pikirkan, atau hal lain yang ingin kamu ungkapkan",
+    placeholder="Contoh: Aku merasa sangat lelah dan tidak semangat akhir-akhir ini...",
+    height=120
+)
 
-  st.write('**Y**')
-  y_raw = df.species
-  y_raw
+# --- Button & Prediction ---
+if st.button("Proses"):
+    status, message = classify_tweet(user_input)
 
-with st.expander('Data visualization'):
-  st.scatter_chart(data=df, x= 'bill_length_mm', y='body_mass_g', color='species')  
-#input features
-with st.sidebar:
-  st.header('Input Features')
-  #"species","island","bill_length_mm","bill_depth_mm","flipper_length_mm","body_mass_g","sex"
-  island = st.selectbox('Island',{'Biscoe','Dream', 'Togerseon' })
-  bill_length_mm = st.slider('Bill length (mm)', 32.1, 59.6, 43.9)
-  bill_depth_mm = st.slider('Bill depth (mm)', 13.1, 21.5, 17.2)
-  flipper_length_mm = st.slider('Flipper length (mm)', 172.0, 231.0, 201.0)
-  body_mass_g = st.slider('Body mass in (g)', 2700,6300, 4200)
-  sex = st.selectbox('Ses',{'Male','Female' })
+    # --- Display Status ---
+    st.markdown("### Status Deteksi")
+    if status == "Berisiko":
+        st.markdown("""
+        <div style='text-align: center;'>
+            <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#9D7BFB 0% 65%, #E3DAFB 65% 100%); margin: auto;'></div>
+            <p style='font-weight: bold; color: #6C3FC5;'>Berisiko</p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div style='text-align: center;'>
+            <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#B0BEC5 0% 30%, #ECEFF1 30% 100%); margin: auto;'></div>
+            <p style='font-weight: bold; color: #546E7A;'>Tidak Relevan</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-  #create a datafreame for the input features
-  data = {'island': island,
-          'bill_length_mm': bill_length_mm,
-          'bill_depth_mm': bill_depth_mm,
-          'flipper_length_mm': flipper_length_mm,
-          'body_mass_g': body_mass_g,
-          'sex': sex}
-  input_df = pd.DataFrame(data, index=[0])
-  input_penguins = pd.concat([input_df, x_raw ], axis=0)
-  
-with st.expander('Input features'):
-  st.write('**Input Penguin**')
-  input_df
-  st.write('**Combined penguins data**')
-  input_penguins
-  
-#data prap
-# encode x(s)
-encode = ['island', ' gender']
-df_penguins = pd.get_dummies(input_penguins, prefix=encode)
-
-X = df_penguins[1:]
-input_row= df_penguins[:1]
-
-# encode y
-target_mapper = {'Adelie': 0,
-                'Chinstrap':1,
-                "Gentoo":2}
-def target_encode(val):
-  return target_mapper[val]
-
-y = y_raw.apply(target_encode)
-
-with st.expander('Data preparation'):
-  st.write('**Encoded x**')
-  input_row
-  st.write('**Encoded y**')
-  y
-
-#model training
-## train ml model
-clf = RandomForestClassifier()
-clf.fit(X, y) 
-
-## apply model to make prediction
-prediction = clf.predict(input_row)
-prediction_prob = clf.predict_proba(input_row)
-
-df_prediction_prob = pd.DataFrame(prediction_prob)
-df_prediction_prob.columns = ('Adelie', 'Chinstrap', 'Gentoo')
-df_prediction_prob.rename(columns= {0: 'Adelie', 
-                                1: 'Chinstrap', 
-                                2: 'Gentoo'})
-
-# display predictied species
-# st.subheader('Predicted Species')
-# penguin_species = np.array(['Adelie', 'Chinstrap', 'Gentoo'])
-# st.success(str(penguins_species(prediction[0])))
-
-with st.expander('Result'):
-  st.write('**Here are the results**')
-  st.write('**Nevermind**')
-  st.write('**HUxley**')
+    # --- Message for User ---
+    st.markdown("### Pesan untuk Kamu")
+    st.write(message)
