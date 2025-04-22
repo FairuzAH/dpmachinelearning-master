@@ -21,7 +21,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # Load colloquial lexicon
-normalizad_word = pd.read_csv("D:/0 Kuliahan/0 FYP/repo/try/colloquial-indonesian-lexicon.csv")
+normalizad_word = pd.read_csv("colloquial-indonesian-lexicon.csv")
 normalizad_word_dict = dict(zip(normalizad_word.iloc[:, 0], normalizad_word.iloc[:, 1]))
 
 # Preprocessing class
@@ -67,7 +67,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         return self
 
 # Load annotated dataset
-df = pd.read_excel("D:/0 Kuliahan/0 FYP/repo/try/annotated_all_agreed.xlsx")
+df = pd.read_excel("annotated_all_agreed.xlsx")
 
 # --------------------- MODEL 1: Relevansi Classification ---------------------
 print("Training Model 1: Relevansi Classification")
