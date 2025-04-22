@@ -1,5 +1,7 @@
 import streamlit as st
 import joblib
+from full_pipeline import TextPreprocessor
+
 
 # Load models
 model_relevansi = joblib.load("model_relevansi_SVM_full_pipeline.pkl")
