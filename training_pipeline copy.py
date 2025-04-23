@@ -1,11 +1,15 @@
 import pandas as pd
 import joblib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from imblearn.pipeline import Pipeline as ImbPipeline
+
 from text_processor import TextPreprocessor
 
 # Load dataset
@@ -28,12 +32,19 @@ pipeline_relevansi.fit(x_train_rel, y_train_rel)
 joblib.dump(pipeline_relevansi, 'model_relevansi_SVM_full_pipeline.pkl')
 
 y_pred_rel = pipeline_relevansi.predict(x_test_rel)
+labels_rel = ['Ya', 'Tidak']
+conf_rel = confusion_matrix(y_test_rel, y_pred_rel, labels=labels_rel)
+confusion_df_rel = pd.DataFrame(conf_rel, index=labels_rel, columns=labels_rel)
 
-# Display metrics
-accuracy_rel = accuracy_score(y_test_rel, y_pred_rel)
-f1_rel = classification_report(y_test_rel, y_pred_rel, output_dict=True)['accuracy']
-print(f"Accuracy (Relevansi): {accuracy_rel * 100:.2f}%")
-print(f"F1 Score (Relevansi): {f1_rel:.2f}")
+print("Accuracy (Relevansi): {:.2f}%".format(accuracy_score(y_test_rel, y_pred_rel) * 100))
+print("\nConfusion Matrix (Relevansi):\n", confusion_df_rel)
+sns.heatmap(confusion_df_rel, annot=True, fmt='d', cmap='Blues')
+plt.title("Confusion Matrix - Relevansi")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()
+
+print("\nClassification Report (Relevansi):\n", classification_report(y_test_rel, y_pred_rel, target_names=labels_rel))
 
 # --------------------- MODEL 2: Kategori Classification ---------------------
 print("Training Model 2: Kategori Classification")
@@ -63,9 +74,16 @@ joblib.dump(pipeline_kategori, 'model_kategori_RF_full_pipeline.pkl')
 
 # Evaluate model
 y_pred_ktg = pipeline_kategori.predict(x_test_ktg)
+conf_ktg = confusion_matrix(y_test_ktg, y_pred_ktg, labels=labels_ktg)
+confusion_df_ktg = pd.DataFrame(conf_ktg, index=labels_ktg, columns=labels_ktg)
 
-# Display metrics
-accuracy_ktg = accuracy_score(y_test_ktg, y_pred_ktg)
-f1_ktg = classification_report(y_test_ktg, y_pred_ktg, output_dict=True)['accuracy']
-print(f"Accuracy (Kategori): {accuracy_ktg * 100:.2f}%")
-print(f"F1 Score (Kategori): {f1_ktg:.2f}")
+# Print accuracy and classification report
+print("Accuracy (Kategori): {:.2f}%".format(accuracy_score(y_test_ktg, y_pred_ktg) * 100))
+print("\nConfusion Matrix (Kategori):\n", confusion_df_ktg)
+sns.heatmap(confusion_df_ktg, annot=True, fmt='d', cmap='Purples')
+plt.title("Confusion Matrix - Kategori")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()
+
+print("\nClassification Report (Kategori):\n", classification_report(y_test_ktg, y_pred_ktg, target_names=labels_ktg))

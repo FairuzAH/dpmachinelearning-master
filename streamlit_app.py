@@ -9,20 +9,15 @@ st.set_page_config(page_title="Mental Health Detector", layout="centered")
 # ✅ Patch the pickle loader so it finds TextPreprocessor
 sys.modules['main'] = text_processor
 
-# --- UI: Loading message
-st.markdown("## ⏳ Memuat model dan preprocessing...")
-
 # --- Load models
 try:
     model_relevansi = joblib.load("model_relevansi_SVM_full_pipeline.pkl")
-    st.success("✅ Model relevansi berhasil dimuat.")
 except Exception as e:
     st.error(f"❌ Gagal memuat model relevansi: {e}")
     st.stop()
 
 try:
     model_kategori = joblib.load("model_kategori_RF_full_pipeline.pkl")
-    st.success("✅ Model kategori berhasil dimuat.")
 except Exception as e:
     st.error(f"❌ Gagal memuat model kategori: {e}")
     st.stop()
@@ -31,9 +26,22 @@ except Exception as e:
 def classify_tweet(text):
     relevansi = model_relevansi.predict([text])[0]
     if relevansi == 'Tidak':
-        return "Tidak Relevan", "Tulisan tidak relevan dengan gangguan kesehatan mental"
+        return "Tidak Relevan", "Kayaknya teks yang kamu masukin nggak nyambung sama topik kesehatan mental. Coba lagi deh kalau ada yang mau kamu ceritain tentang itu. Kalau butuh bantuan, kami siap denger kok!"
     else:
         kategori = model_kategori.predict([text])[0]
+        
+        if kategori == 'Terindikasi':
+            return "Berisiko", "Kayaknya kamu lagi ngalamin beberapa gejala yang bisa jadi gangguan mental. Ini mungkin jadi langkah pertama buat lebih ngerti perasaanmu. Kalau kamu ngerasa nggak nyaman, coba deh ngobrol sama orang yang ahli, kayak psikolog atau konselor. Ingat, nggak ada salahnya minta bantuan, itu malah langkah berani dan bisa ngebantu banget!"
+        
+        elif kategori == 'Penderita':
+            return "Berisiko", "Kelihatannya kamu lagi berjuang dengan gangguan mental. Ini nggak mudah, tapi percayalah, kamu nggak sendirian. Jangan ragu untuk cari bantuan dari seorang profesional. Kadang ngobrol sama orang yang ngerti bisa bantu banget untuk merasa lebih baik, dan kamu punya hak untuk itu."
+        
+        elif kategori == 'Penyintas':
+            return "Berisiko", "Kamu udah melalui banyak hal dan tetap bertahan, itu luar biasa! Kadang-kadang, meskipun kita udah merasa lebih baik, ada kalanya perasaan berat datang lagi, itu wajar kok. Kalau kamu butuh dukungan lagi, jangan ragu buat cari bantuan. Kami bangga sama ketangguhanmu!"
+        
+        elif kategori == 'Selfdiagnosed':
+            return "Berisiko", "Kayaknya kamu udah cukup ngerti soal perasaanmu, tapi tetap aja, nggak ada salahnya kalau coba cek sama ahli untuk bener-bener memastikan. Bisa jadi ada cara yang lebih efektif untuk ngatasin apa yang kamu rasain, dan profesional bisa bantu kamu lebih jelas dalam prosesnya."
+
         return "Berisiko", f"Ada potensi kamu termasuk dalam kategori: **{kategori}**."
 
 # --- UI input
