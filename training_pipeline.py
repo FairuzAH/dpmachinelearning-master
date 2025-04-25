@@ -1,5 +1,7 @@
 import pandas as pd
 import joblib
+import time
+
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
@@ -7,6 +9,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from imblearn.pipeline import Pipeline as ImbPipeline
 from text_processor import TextPreprocessor
+
+
+start_time = time.time()
 
 # Load dataset
 df = pd.read_excel("annotated_all_agreed.xlsx")
@@ -69,3 +74,6 @@ accuracy_ktg = accuracy_score(y_test_ktg, y_pred_ktg)
 f1_ktg = classification_report(y_test_ktg, y_pred_ktg, output_dict=True)['accuracy']
 print(f"Accuracy (Kategori): {accuracy_ktg * 100:.2f}%")
 print(f"F1 Score (Kategori): {f1_ktg:.2f}")
+
+end_time = time.time()
+print(f"Execution time: {end_time - start_time} seconds")
