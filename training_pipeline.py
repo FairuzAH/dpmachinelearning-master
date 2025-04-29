@@ -14,14 +14,14 @@ from text_processor import TextPreprocessor
 start_time = time.time()
 
 # Load dataset
-df = pd.read_excel("annotated_all_agreed.xlsx")
+df = pd.read_excel("dataset_final.xlsx")
 
 # --------------------- MODEL 1: Relevansi Classification ---------------------
 print("Training Model 1: Relevansi Classification")
-X_relevansi = df['tweet']
-y_relevansi = df['relevansi']
+X_relevansi = df['tweet_ori']
+y_relevansi = df['relevansi_final']
 
-x_train_rel, x_test_rel, y_train_rel, y_test_rel = train_test_split(X_relevansi, y_relevansi, test_size=0.20, random_state=0)
+x_train_rel, x_test_rel, y_train_rel, y_test_rel = train_test_split(X_relevansi, y_relevansi, test_size=0.20, random_state=0, stratify= y_relevansi)
 
 pipeline_relevansi = ImbPipeline([
     ('preprocessing', TextPreprocessor()),
@@ -30,7 +30,7 @@ pipeline_relevansi = ImbPipeline([
 ])
 
 pipeline_relevansi.fit(x_train_rel, y_train_rel)
-joblib.dump(pipeline_relevansi, 'model_relevansi_SVM_full_pipeline.pkl')
+joblib.dump(pipeline_relevansi, 'model_relevansi.pkl')
 
 y_pred_rel = pipeline_relevansi.predict(x_test_rel)
 
@@ -44,14 +44,14 @@ print(f"F1 Score (Relevansi): {f1_rel:.2f}")
 print("Training Model 2: Kategori Classification")
 
 # Exclude rows where 'kategori' is "Tidak"
-df_filtered = df[df['kategori'] != 'Tidak']
+df_filtered = df[df['kategori_final'] != 'Tidak']
 
 # Now split the data again
-X_kategori = df_filtered['tweet']
-y_kategori = df_filtered['kategori']
+X_kategori = df_filtered['tweet_ori']
+y_kategori = df_filtered['kategori_final']
 
 # Train-test split
-x_train_ktg, x_test_ktg, y_train_ktg, y_test_ktg = train_test_split(X_kategori, y_kategori, test_size=0.20, random_state=0)
+x_train_ktg, x_test_ktg, y_train_ktg, y_test_ktg = train_test_split(X_kategori, y_kategori, test_size=0.20, random_state=0, stratify= y_kategori)
 
 # Update labels_ktg (without "Tidak")
 labels_ktg = ['Terindikasi', 'Selfdiagnosed', 'Penderita', 'Penyintas']
@@ -64,7 +64,7 @@ pipeline_kategori = ImbPipeline([
 ])
 
 pipeline_kategori.fit(x_train_ktg, y_train_ktg)
-joblib.dump(pipeline_kategori, 'model_kategori_RF_full_pipeline.pkl')
+joblib.dump(pipeline_kategori, 'model_kategori_.pkl')
 
 # Evaluate model
 y_pred_ktg = pipeline_kategori.predict(x_test_ktg)

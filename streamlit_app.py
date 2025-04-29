@@ -11,13 +11,13 @@ sys.modules['main'] = text_processor
 
 # --- Load models
 try:
-    model_relevansi = joblib.load("model_relevansi_SVM_full_pipeline.pkl")
+    model_relevansi = joblib.load("model_relevansi.pkl")
 except Exception as e:
     st.error(f"❌ Gagal memuat model relevansi: {e}")
     st.stop()
 
 try:
-    model_kategori = joblib.load("model_kategori_RF_full_pipeline.pkl")
+    model_kategori = joblib.load("model_kategori.pkl")
 except Exception as e:
     st.error(f"❌ Gagal memuat model kategori: {e}")
     st.stop()
