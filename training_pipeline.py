@@ -64,7 +64,7 @@ pipeline_kategori = ImbPipeline([
 ])
 
 pipeline_kategori.fit(x_train_ktg, y_train_ktg)
-joblib.dump(pipeline_kategori, 'model_kategori_.pkl')
+joblib.dump(pipeline_kategori, 'model_kategori.pkl')
 
 # Evaluate model
 y_pred_ktg = pipeline_kategori.predict(x_test_ktg)
