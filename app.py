@@ -9,6 +9,15 @@ st.set_page_config(page_title="Mental Health Detector", layout="centered")
 # ✅ Patch the pickle loader so it finds TextPreprocessor
 sys.modules['main'] = text_processor
 
+# --- Decorative header (optional image banner)
+st.markdown("""
+    <div style='text-align: center;'>
+        <h1 style='color: #4A90E2;'>🧠 Mental Health Detector</h1>
+        <p style='font-size: 18px; color: #555;'>Deteksi awal perasaanmu bisa jadi langkah pertama untuk pulih</p>
+        <hr style='border: 1px solid #ccc;'/>
+    </div>
+""", unsafe_allow_html=True)
+
 # --- Load models
 try:
     model_relevansi = joblib.load("model_relevansi.pkl")
@@ -21,78 +30,71 @@ try:
 except Exception as e:
     st.error(f"❌ Gagal memuat model kategori: {e}")
     st.stop()
-    
+
 # --- Classification logic
 def classify_tweet(text):
     relevansi = model_relevansi.predict([text])[0]
     if relevansi == 'Tidak':
-        return "Tidak Relevan", "Kayaknya teks yang kamu masukin nggak nyambung sama topik kesehatan mental. Coba lagi deh kalau ada yang mau kamu ceritain tentang itu. Kalau butuh bantuan, kami siap denger kok!", None  # Return None for kategori when not relevant
+        return "Tidak Relevan", "😕 Sepertinya teks ini tidak berhubungan dengan topik kesehatan mental. Coba lagi, ya. Kalau butuh bantuan, kami siap mendengarkan!", None
     else:
         kategori = model_kategori.predict([text])[0]
-        
-        print(f"Predicted kategori: {kategori}")  # Debug print to verify prediction
 
-        # Return the status, message, and kategori
         if kategori == 'Terindikasi':
-            return "Berisiko", "Kayaknya kamu lagi ngalamin beberapa gejala yang bisa jadi gangguan mental. Ini mungkin jadi langkah pertama buat lebih ngerti perasaanmu. Kalau kamu ngerasa nggak nyaman, coba deh ngobrol sama orang yang ahli, kayak psikolog atau konselor.", kategori
-        
+            return "Berisiko", "🔍 Sepertinya kamu mengalami beberapa gejala gangguan mental. Mungkin ini saatnya mulai mengenali lebih dalam perasaanmu. Konsultasi dengan ahli bisa sangat membantu.", kategori
         elif kategori == 'Penderita':
-            return "Berisiko", "Kelihatannya kamu lagi berjuang dengan gangguan mental. Ini nggak mudah, tapi percayalah, kamu nggak sendirian. Jangan ragu untuk cari bantuan dari seorang profesional.", kategori
-        
+            return "Berisiko", "💔 Kelihatannya kamu sedang berjuang dengan gangguan mental. Tapi kamu tidak sendiri. Ada banyak cara untuk mendapatkan dukungan. Coba hubungi profesional, ya.", kategori
         elif kategori == 'Penyintas':
-            return "Berisiko", "Kamu udah melalui banyak hal dan tetap bertahan, itu luar biasa! Kadang-kadang, meskipun kita udah merasa lebih baik, ada kalanya perasaan berat datang lagi, itu wajar kok.", kategori
-        
+            return "Berisiko", "🌱 Kamu telah melalui masa sulit dan tetap bertahan. Itu luar biasa! Jika sesekali masih terasa berat, itu sangat manusiawi kok.", kategori
         elif kategori == 'Selfdiagnosed':
-            return "Berisiko", "Kayaknya kamu udah cukup ngerti soal perasaanmu, tapi tetap aja, nggak ada salahnya kalau coba cek sama ahli untuk bener-bener memastikan.", kategori
+            return "Berisiko", "🧩 Kamu tampaknya sudah menyadari perasaanmu. Tapi tetap penting untuk verifikasi melalui bantuan profesional agar lebih jelas dan aman.", kategori
 
         return "Berisiko", f"Ada potensi kamu termasuk dalam kategori: **{kategori}**.", kategori
 
-# --- UI input
-st.markdown("## Apa yang ada di pikiranmu?")
+# --- UI Input
+st.markdown("## ✍️ Ceritakan Perasaanmu")
 user_input = st.text_area(
-    "Tulis tentang bagaimana perasaanmu, apa yang sedang kamu pikirkan, atau hal lain yang ingin kamu ungkapkan",
+    "Tulis apa yang sedang kamu rasakan atau pikirkan...",
     placeholder="Contoh: Aku merasa sangat lelah dan tidak semangat akhir-akhir ini...",
-    height=120
+    height=150
 )
 
-# --- Process button
-if st.button("Proses") and user_input.strip():
-    status, message, kategori = classify_tweet(user_input)  # Receive kategori here
+# --- Process Button
+if st.button("🚀 Proses"):
+    if user_input.strip():
+        status, message, kategori = classify_tweet(user_input)
 
-    # --- Display status based on the predicted category (kategori)
-    if status == "Berisiko":
-        st.markdown("### Status Deteksi")
-        
-        # Check the specific kategori value to render a corresponding color/status
-        if kategori == 'Terindikasi':
-            st.markdown("""
+        if status == "Berisiko":
+            st.markdown("## 📋 Hasil Deteksi")
+
+            # --- Visualization
+            if kategori == 'Terindikasi':
+                color, label = "#9D7BFB", "Terindikasi"
+            elif kategori == 'Penderita':
+                color, label = "#F44336", "Penderita"
+            elif kategori == 'Penyintas':
+                color, label = "#4CAF50", "Penyintas"
+            elif kategori == 'Selfdiagnosed':
+                color, label = "#FF9800", "Selfdiagnosed"
+
+            st.markdown(f"""
                 <div style='text-align: center;'>
-                    <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#9D7BFB 0% 65%, #E3DAFB 65% 100%); margin: auto;'></div>
-                    <p style='font-weight: bold; color: #6C3FC5;'>Terindikasi</p>
-                </div>
-            """, unsafe_allow_html=True)
-        elif kategori == 'Penderita':
-            st.markdown("""
-                <div style='text-align: center;'>
-                    <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#F44336 0% 65%, #FFCDD2 65% 100%); margin: auto;'></div>
-                    <p style='font-weight: bold; color: #D32F2F;'>Penderita</p>
-                </div>
-            """, unsafe_allow_html=True)
-        elif kategori == 'Penyintas':
-            st.markdown("""
-                <div style='text-align: center;'>
-                    <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#4CAF50 0% 65%, #C8E6C9 65% 100%); margin: auto;'></div>
-                    <p style='font-weight: bold; color: #388E3C;'>Penyintas</p>
-                </div>
-            """, unsafe_allow_html=True)
-        elif kategori == 'Selfdiagnosed':
-            st.markdown("""
-                <div style='text-align: center;'>
-                    <div style='width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#FF9800 0% 65%, #FFECB3 65% 100%); margin: auto;'></div>
-                    <p style='font-weight: bold; color: #F57C00;'>Selfdiagnosed</p>
+                    <div style='width: 100px; height: 100px; border-radius: 50%;
+                                background: conic-gradient({color} 0% 65%, #EEE 65% 100%);
+                                margin: auto;'></div>
+                    <p style='font-weight: bold; color: {color}; font-size: 20px;'>{label}</p>
                 </div>
             """, unsafe_allow_html=True)
 
-    # --- Message
-    st.markdown("### Pesan untuk Kamu")
-    st.write(message)
+        # --- Always show the feedback message
+        st.markdown("### 💌 Pesan untuk Kamu")
+        st.success(message)
+    else:
+        st.warning("⚠️ Silakan isi dulu teksnya sebelum diproses.")
+
+# --- Footer
+st.markdown("""
+    <hr style='border: 0.5px solid #ccc;'/>
+    <div style='text-align: center; font-size: 13px; color: gray;'>
+        Dibuat untuk membantu mengenali kesehatan mental — bukan sebagai diagnosis akhir. Konsultasikan dengan profesional untuk bantuan lebih lanjut.
+    </div>
+""", unsafe_allow_html=True)
