@@ -36,6 +36,8 @@ def classify_tweet(text):
     relevansi = model_relevansi.predict([text])[0]
     if relevansi == 'Tidak':
         return "Tidak Relevan", "😕 Sepertinya teks ini tidak berhubungan dengan topik kesehatan mental. Coba lagi, ya. Kalau butuh bantuan, kami siap mendengarkan!", None
+        #return "Tidak Relevan", "udah yappingnya?☝️🤓", None
+
     else:
         kategori = model_kategori.predict([text])[0]
 
