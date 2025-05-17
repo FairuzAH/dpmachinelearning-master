@@ -1,15 +1,13 @@
 import streamlit as st
 import sys
 import joblib
-import text_processor  # Your real module with TextPreprocessor
+import text_processor 
 
-# ✅ Must come first
 st.set_page_config(page_title="Mental Health Detector", layout="centered")
 
-# ✅ Patch the pickle loader so it finds TextPreprocessor
 sys.modules['main'] = text_processor
 
-# --- Decorative header (optional image banner)
+# header 
 st.markdown("""
     <div style='text-align: center;'>
         <h1 style='color: #4A90E2;'>🧠 Mental Health Detector</h1>
@@ -18,7 +16,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- Load models
+# Load models
 try:
     model_relevansi = joblib.load("model_relevansi.pkl")
 except Exception as e:
@@ -31,13 +29,12 @@ except Exception as e:
     st.error(f"❌ Gagal memuat model kategori: {e}")
     st.stop()
 
-# --- Classification logic
+# Classification logic
 def classify_tweet(text):
     relevansi = model_relevansi.predict([text])[0]
     if relevansi == 'Tidak':
         return "Tidak Relevan", "😕 Sepertinya teks ini tidak berhubungan dengan topik kesehatan mental. Coba lagi, ya. Kalau butuh bantuan, kami siap mendengarkan!", None
-        #return "Tidak Relevan", "udah yappingnya?☝️🤓", None
-
+        #return "Tidak Relevan", "udah yappingnya?☝️🤓", None    
     else:
         kategori = model_kategori.predict([text])[0]
 
@@ -52,7 +49,7 @@ def classify_tweet(text):
 
         return "Berisiko", f"Ada potensi kamu termasuk dalam kategori: **{kategori}**.", kategori
 
-# --- UI Input
+# UI Input
 st.markdown("## ✍️ Ceritakan Perasaanmu")
 user_input = st.text_area(
     "Tulis apa yang sedang kamu rasakan atau pikirkan...",
@@ -60,7 +57,7 @@ user_input = st.text_area(
     height=150
 )
 
-# --- Process Button
+# Process Button
 if st.button("🚀 Proses"):
     if user_input.strip():
         status, message, kategori = classify_tweet(user_input)
@@ -68,32 +65,41 @@ if st.button("🚀 Proses"):
         if status == "Berisiko":
             st.markdown("## 📋 Hasil Deteksi")
 
-            # --- Visualization
-            if kategori == 'Terindikasi':
-                color, label = "#9D7BFB", "Terindikasi"
-            elif kategori == 'Penderita':
-                color, label = "#F44336", "Penderita"
-            elif kategori == 'Penyintas':
-                color, label = "#4CAF50", "Penyintas"
-            elif kategori == 'Selfdiagnosed':
-                color, label = "#FF9800", "Selfdiagnosed"
+            # Visualization
+            progress_color = {
+                "Terindikasi": "#9D7BFB",
+                "Penderita": "#F44336",
+                "Penyintas": "#4CAF50",
+                "Selfdiagnosed": "#FF9800"
+            }
 
+            description_text = {
+                "Terindikasi": "Ada indikasi awal dari gangguan mental.",
+                "Penderita": "Sedang mengalami gangguan mental.",
+                "Penyintas": "Pernah mengalami namun saat ini sudah lebih baik.",
+                "Selfdiagnosed": "Sudah menyadari kondisi sendiri, perlu verifikasi."
+            }
+
+            st.markdown("### 🎯 Kategori Deteksi")
             st.markdown(f"""
-                <div style='text-align: center;'>
-                    <div style='width: 100px; height: 100px; border-radius: 50%;
-                                background: conic-gradient({color} 0% 65%, #EEE 65% 100%);
-                                margin: auto;'></div>
-                    <p style='font-weight: bold; color: {color}; font-size: 20px;'>{label}</p>
-                </div>
+            <div style='
+                padding: 1em;
+                background-color: {progress_color[kategori]}20;
+                border-left: 6px solid {progress_color[kategori]};
+                border-radius: 5px;
+                margin-bottom: 1em;'>
+                <strong style='color: {progress_color[kategori]}; font-size: 18px;'>{kategori}</strong><br>
+                <span style='color: #333;'>{description_text[kategori]}</span>
+            </div>
             """, unsafe_allow_html=True)
 
-        # --- Always show the feedback message
+        # Always show the feedback message
         st.markdown("### 💌 Pesan untuk Kamu")
         st.success(message)
     else:
         st.warning("⚠️ Silakan isi dulu teksnya sebelum diproses.")
 
-# --- Footer
+# Footer
 st.markdown("""
     <hr style='border: 0.5px solid #ccc;'/>
     <div style='text-align: center; font-size: 13px; color: gray;'>
